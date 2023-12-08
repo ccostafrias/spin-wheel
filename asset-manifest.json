@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/spin-wheel/static/css/main.2489a0f0.css",
+    "main.js": "/spin-wheel/static/js/main.b851347b.js",
+    "index.html": "/spin-wheel/index.html",
+    "main.2489a0f0.css.map": "/spin-wheel/static/css/main.2489a0f0.css.map",
+    "main.b851347b.js.map": "/spin-wheel/static/js/main.b851347b.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.2489a0f0.css",
+    "static/js/main.b851347b.js"
+  ]
+}

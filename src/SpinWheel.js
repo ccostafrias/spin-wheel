@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 
 import Odds from "./Odds"
 import Modal from './Modal'
+import Winner from './Winner'
+import Save from './Save'
 
 import Github from './svg/Github'
 
@@ -12,8 +14,8 @@ export default function SpinWheel() {
 
   const [angle, setAngle] = useState(0)
   const [isSpinning, setIsSpinning] = useState(false)
-  const [isModalOpen, setIsModalOpen] = useState(false)
   const [history, setHistory] = useState([])
+  const [wheels, setWheels] = useState(JSON.parse(localStorage.getItem('wheels') || []))
   const [spinValues, setSpinValues] = useState([
     {
       name: 'sv-1',
@@ -38,6 +40,9 @@ export default function SpinWheel() {
     },
   ])
   
+  const [isWinnerOpen, setIsWinnerOpen] = useState(false)
+  const [isSaveOpen, setIsSaveOpen] = useState(false)
+
   function spinBall() {
     setIsSpinning(true)
     setAngle(prevAngle => {
@@ -49,7 +54,7 @@ export default function SpinWheel() {
     })
   }
 
-  function verifyWin() {
+  function addHistory() {
     const actualAngle = Math.abs(angle % 360)
     const segmentWinner = spinValues.find((s, i) => {
       const sum = i > 0 ? spinValues.reduce((acc, curr, index) => index < i ? acc + curr.value : acc ,0) * 360 / 100 : 0
@@ -59,7 +64,7 @@ export default function SpinWheel() {
     })
 
     setHistory(prev => [...prev, segmentWinner])
-    setIsModalOpen(true)
+    setIsWinnerOpen(true)
   }
 
   const aroundBallsElements = Array(ballsCount).fill().map((_, i) => {
@@ -77,6 +82,10 @@ export default function SpinWheel() {
     const sumPercentage = spinValues.slice(0, -(spinValues.length - i))?.reduce((acc, curr) => acc + curr.value ,0)
     const angleLessThan = value < 12
     const higherText = spinValues.reduce((prev, curr) => prev.text.length > curr.text.length ? prev : curr).text.length
+    // const fontSize = -(higherText/4) + 3.25
+    const fontSize = (100/120)**(higherText-7)+0.5
+    // const fontSize = 1/higherText + .5
+    console.log(fontSize)
     return (
       <>
         <div 
@@ -94,7 +103,7 @@ export default function SpinWheel() {
           }}>
             <div className={`spin-text ${angleLessThan ? 'outside' : ''}`} style={{
                 // transform: angleLessThan ? `translate(-50%, -400%) rotate(90deg)` : `translate(-50%, -50%) rotate(90deg)`,
-                fontSize: ''
+                fontSize: `${fontSize}rem`
             }}>{s.text}</div>
           </div>
         </div>
@@ -102,21 +111,34 @@ export default function SpinWheel() {
     )
   })
 
-  function saveWheel() {
-    const stringify = JSON.stringify(spinValues)
-    localStorage.setItem('spinValues', stringify)
-  }
+  useEffect(() => {
+    const stringify = JSON.stringify(wheels)
+    localStorage.setItem('wheels', stringify)
+  }, [wheels])
 
   return (
     <>
       <Modal
-        isOpen={isModalOpen}
-        closeModal={() => setIsModalOpen(false)}
-        winner={history[history.length-1]?.text}
-      />
+        isOpen={isWinnerOpen}
+        onClick={() => setIsWinnerOpen(false)}
+      >
+        <Winner 
+          winner={history[history.length-1]?.text}
+        />
+      </Modal>
+      <Modal
+        isOpen={isSaveOpen}
+        onClick={() => null}
+      >
+        <Save
+          wheels={wheels}
+          setWheels={setWheels}
+          spinValues={spinValues}
+          closeSave={() => setIsSaveOpen(false)}
+        />
+      </Modal>
       <header className='main-header'>
         <h2>SpinWheel</h2>
-        <button className='bttn anim' onClick={saveWheel}>Save</button>
         <a href="https://github.com/ccostafrias" target='_blank'>
           <Github
             className='icon-medium'
@@ -137,7 +159,7 @@ export default function SpinWheel() {
             onTransitionEnd={(e) => {
               if (e.propertyName !== 'transform') return
               setIsSpinning(false)
-              verifyWin()
+              addHistory()
             }}
           >
             <div className='spin-balls-wrapper' style={{
@@ -153,6 +175,11 @@ export default function SpinWheel() {
           setSpinValues={setSpinValues}
           isSpinning={isSpinning}
           colors={colors}
+          history={history}
+          setHistory={setHistory}
+          wheels={wheels}
+          setWheels={setWheels}
+          setIsSaveOpen={setIsSaveOpen}
         />
       </main>
     </>

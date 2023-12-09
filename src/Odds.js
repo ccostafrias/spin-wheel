@@ -3,6 +3,8 @@ import React, { useState, useEffect, useRef } from 'react'
 import ArrowLeft from "./svg/ArrowLeft"
 import Close from "./svg/Close"
 
+import { preSaveWheels } from './wheelsData'
+
 export default function Odds(props) {
 
   const {
@@ -10,11 +12,17 @@ export default function Odds(props) {
     setSpinValues,
     isSpinning,
     colors,
+    history,
+    setHistory,
+    wheels,
+    setWheels,
+    setIsSaveOpen,
   } = props
 
   const [isDown, setIsDown] = useState(true)
   const [clickedInput, setClickedInput] = useState(null)
   const [focusedInput, setFocusedInput] = useState(null)
+  const [oddChoose, setOddChoose] = useState('odds')
   const isDownRef = useRef(true)
 
   const arrowSize = getComputedStyle(document.documentElement)
@@ -127,19 +135,14 @@ export default function Odds(props) {
     if (!clickedInput && !focusedInput) setIsDown(down)
   }
 
-  useEffect(() => {
+  function changeActualSpin(arr, name) {
+    const newSpin = arr.find(w => w.name === name)
+    setSpinValues(newSpin.segments)
+  }
 
-  }, [])
-  
-  useEffect(() => {
-    window.addEventListener('mousemove', handleMouseMove)
-    window.addEventListener('mouseup', handleInputClick)
-
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove)
-      window.removeEventListener('mouseup', handleInputClick)
-    }
-  }, [spinValues, clickedInput])
+  function removeWheel(name) {
+    setWheels(prev =>  prev.filter(w => w.name !== name))
+  }
 
   const oddsElements = spinValues.map((s, i) => {
     return (
@@ -166,6 +169,7 @@ export default function Odds(props) {
             id='text'
             value={s.text}
             onChange={handleChangeInput}
+            autoComplete='off'
           />
         </span>
         <span 
@@ -200,12 +204,55 @@ export default function Odds(props) {
     )
   })
 
+  const historyElements = history.length > 0 ? history.map((h, i) => {
+    return (
+      <>
+        <li>{i+1}º - {h.text}</li>
+      </>
+    )
+  }) : <span>No history yet :(</span>
+
+  const wheelsElements = wheels.length > 0 ? wheels.map((w, i) => {
+    return (
+      <>
+        <li className='save-item' onClick={() => changeActualSpin(wheels, w.name)}>
+          <span>{w.name}</span>
+          <Close 
+            className='icon-small icon-click'
+            onClick={() => removeWheel(w.name)}
+          />
+        </li>
+      </>
+    )
+  }) : <span>No save yet :(</span>
+
+  const preSaveWheelsElements = preSaveWheels.map((w, i) => {
+    return (
+      <>
+        <li className='save-item' onClick={() => changeActualSpin(preSaveWheels, w.name)}>
+          <span>{w.name}</span>
+        </li>
+      </>
+    )
+  })
+
+  useEffect(() => {
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseup', handleInputClick)
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseup', handleInputClick)
+    }
+  }, [spinValues, clickedInput])
+
+
   return (
     <>
       <div 
         className='odds-container' 
         style={{
-          transform: isDown ? `translateX(calc(100% - 42px - ${arrowSize}))` : 'translateX(0)'
+          // transform: isDown ? `translateX(calc(100% - 42px - ${arrowSize}))` : 'translateX(0)'
         }}
         onMouseOver={() => handleMouseContainer(false)}
         onMouseLeave={() => handleMouseContainer(true)}
@@ -213,7 +260,7 @@ export default function Odds(props) {
         <div 
           className="arrow-wrapper" 
           style={{
-            opacity: isDown ? '1' : '0',
+            opacity: isDown ? '0' : '0',
             pointerEvents: isDown ? 'all' : 'none',
           }}
         >
@@ -222,20 +269,65 @@ export default function Odds(props) {
         <div 
           className="odds-content" 
           style={{
-            opacity: isDown ? '0' : '1',
+            // opacity: isDown ? '0' : '1',
             pointerEvents: isDown ? 'none' : 'all',
           }}
         >
-          <h3>Change odds:</h3>
-          <div className='odds-wrapper'>
-              {oddsElements}
+          <div className='odds-header'>
+            <div onClick={() => setOddChoose('odds')} className={`odd-choose ${oddChoose === 'odds' ? 'active' : ''}`}>Odds</div>
+            <div onClick={() => setOddChoose('history')} className={`odd-choose ${oddChoose === 'history' ? 'active' : ''}`}>History</div>
+            <div onClick={() => setOddChoose('saves')} className={`odd-choose ${oddChoose === 'saves' ? 'active' : ''}`}>Saves</div>
           </div>
-          <button 
-            className='bttn dark anim'
-            onClick={addMoreOdds}
-          >
-            +
-          </button>
+          {oddChoose === 'odds' && (
+            <>
+              <div className='odds-wrapper'>
+                  {oddsElements}
+              </div>
+              <button
+                className='bttn dark anim'
+                onClick={addMoreOdds}
+              >
+                +
+              </button>
+            </>
+          )}
+          {oddChoose === 'history' && (
+            <>
+              <div className='history-elements'>
+                <ul>{historyElements}</ul>
+              </div>
+              <button
+                className='bttn dark anim'
+                onClick={addMoreOdds}
+              >
+                Clear
+              </button>
+            </>
+          )}
+          {oddChoose === 'saves' && (
+            <>
+              <div className='save-elements'>
+                <h3 className='save-label'>Pre saves</h3>
+                <ul className='save-list'>{preSaveWheelsElements}</ul>
+                <h3 className='save-label'>My saves</h3>
+                <ul className='save-list'>{wheelsElements}</ul>
+              </div>
+              <div className='bttns-wrapper'>
+                <button
+                  className='bttn dark anim save-bttn'
+                  onClick={() => setIsSaveOpen(true)}
+                >
+                  Save
+                </button>
+                <button
+                  className='bttn dark anim save-bttn'
+                  onClick={addMoreOdds}
+                >
+                  New
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </>

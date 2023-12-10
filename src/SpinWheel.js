@@ -17,8 +17,8 @@ export default function SpinWheel() {
 
   const [angle, setAngle] = useState(0)
   const [isSpinning, setIsSpinning] = useState(false)
-  const [history, setHistory] = useState(JSON.parse(localStorage.getItem('history') || []))
-  const [wheels, setWheels] = useState(JSON.parse(localStorage.getItem('wheels') || []))
+  const [history, setHistory] = useState(JSON.parse(localStorage.getItem('history')) || [])
+  const [wheels, setWheels] = useState(JSON.parse(localStorage.getItem('wheels')) || [])
   const [actualWheel, setActualWheel] = useState('')
   const [nextValue, setNextValue] = useState(() => defaultWheel.nextValue)
   const [spinValues, setSpinValues] = useState(defaultWheel.segments)

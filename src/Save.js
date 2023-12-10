@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 
 export default function Winner(props) {
   const {
-    wheels,
     setWheels,
     spinValues,
     closeSave,
+    setActualWheel,
+    isOpen,
   } = props
 
   const [input, setInput] = useState({
@@ -22,6 +23,8 @@ export default function Winner(props) {
       }
     ))
   }
+
+  const inputRef = useRef(null)
 
   function handleSubmit(e) {
     console.log(input.save)
@@ -40,9 +43,16 @@ export default function Winner(props) {
           },
         ]
       })
+      setActualWheel(input.save)
       closeSave()
     }
   }
+
+  useEffect(() => {
+    if (isOpen) {
+      inputRef.current.focus()
+    }
+  }, isOpen)
 
   return (
       <div className='save-container'>
@@ -58,6 +68,8 @@ export default function Winner(props) {
           value={input.save}
           onChange={handleChange}
           autoComplete='off'
+          placeholder='Insert a name'
+          ref={inputRef}
         />
         <button type='submit' className='bttn anim' onClick={handleSubmit}>Save</button>
       </div>

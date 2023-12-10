@@ -1,6 +1,41 @@
 export const preSaveWheels = [
     {
+        name: 'Default',
+        colors: ['#006d77', '#83c5be', '#ffddd2', '#e29578'],
+        nextValue: ((num) => {
+          return `Choice ${num}`
+        }),
+        segments: [
+          {
+            name: 'sv-1',
+            text: 'Choice 1',
+            value: 33.3333,
+            color: '#006d77',
+            isFocus: false,
+          },
+          {
+            name: 'sv-2',
+            text: 'Choice 2',
+            value: 33.3333,
+            color: '#83c5be',
+            isFocus: false,
+          },
+          {
+            name: 'sv-3',
+            text: 'Choice 3',
+            value: 33.3333,
+            color: '#ffddd2',
+            isFocus: false,
+          },
+        ]
+    },
+    {
         name: 'Yes or No',
+        colors: ['#60d394', '#ee6055'],
+        nextValue: (num) => {
+          const choices = ['Yes', 'No']
+          return choices[num % choices.length]
+        },
         segments: [
             {
                 name: 'sv-1',
@@ -19,7 +54,11 @@ export const preSaveWheels = [
         ]
     },
     {
-        name: 'Dice',
+        name: 'D6 die',
+        colors: ['#C0C0C0', '#EBEBEB'],
+        nextValue: (num) => {
+          return String(num)
+        },
         segments: [
             {
                 name: 'sv-1',
@@ -64,5 +103,29 @@ export const preSaveWheels = [
                 isFocus: false,
               },
         ],
-    }
+    },
+    {
+      name: 'Heads or Tails',
+      colors: ['#D4AF37', '#D3D3D3'],
+      nextValue: (num) => {
+        const choices = ['Heads', 'Tails']
+        return choices[num % choices.length]
+      },
+      segments: [
+          {
+              name: 'sv-1',
+              text: 'Heads',
+              value: 50,
+              color: '#D4AF37',
+              isFocus: false,
+            },
+            {
+              name: 'sv-2',
+              text: 'Tails',
+              value: 50,
+              color: '#D3D3D3',
+              isFocus: false,
+            },
+      ]
+  },
 ]

@@ -7,7 +7,7 @@ export default function Winner(props) {
 
   return (
       <div className='modal-text'>
-        {`${winner}!`}
+        {`${winner}`}
       </div>
   )
 

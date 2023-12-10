@@ -148,7 +148,7 @@ h2 {
 
 .bttns-wrapper {
   display: flex;
-  gap: 1rem;
+  gap: .25rem;
 }
 
 .bttn {
@@ -499,6 +499,15 @@ html:has(.is-changing) {
   border-radius: 5px;
 }
 
+.odds-close {
+  transform: scale(1);
+  transition: transform .1s ease-out;
+}
+
+.odds-close:hover {
+  transform: scale(1.1);
+}
+
 .arrow-wrapper {
   position: absolute;
   display: flex;
@@ -594,6 +603,7 @@ html:has(.is-changing) {
 }
 
 .modal-text {
+  text-align: center;
   font-weight: bold;
   font-size: var(--fs-600);
   transform: scale(.5);
@@ -649,6 +659,11 @@ html:has(.is-changing) {
   text-align: center;
 }
 
+.save-input::placeholder {
+  color: var(--secondary-color);
+  opacity: .5;
+}
+
 .save-alert {
   font-size: var(--fs-200);
   color: red;
@@ -662,16 +677,29 @@ html:has(.is-changing) {
   color: var(--primary-color);
 }
 
-.save-list {
+.save-list, .history-list {
   display: flex;
   flex-direction: column;
   gap: .25rem;
 }
 
-.save-item {
+.save-text, .history-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.save-wrapper {
+  position: relative;
+
+}
+
+.save-item, .history-item {
+  position: relative;
   display: flex;
-  align-content: center;
+  align-items: center;
   justify-content: space-between;
+  gap: .5rem;
   padding: .25em;
   border-radius: 5px;
   background-color: var(--primary-color);
@@ -679,8 +707,25 @@ html:has(.is-changing) {
   transition: all .2s ease;
 }
 
+.history-item {
+  cursor: default;
+}
+
+
 .save-item:hover {
   opacity: .75;
+}
+
+.save-close {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translate(-50%, -50%) scale(1);
+  transition: transform .1s ease-out;
+}
+
+.save-close:hover {
+  transform: translate(-50%, -50%) scale(1.1);
 }
 
 .save-bttn {

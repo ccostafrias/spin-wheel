@@ -17,6 +17,11 @@ export default function Odds(props) {
     wheels,
     setWheels,
     setIsSaveOpen,
+    actualWheel,
+    setActualWheel,
+    setColors,
+    setNextValue,
+    nextValue,
   } = props
 
   const [isDown, setIsDown] = useState(true)
@@ -27,6 +32,8 @@ export default function Odds(props) {
 
   const arrowSize = getComputedStyle(document.documentElement)
     .getPropertyValue('--arrow-size')
+
+  // Input
   
   function handleChange(event) {
     if (isDown) return
@@ -60,47 +67,6 @@ export default function Odds(props) {
     })
   }
 
-  function highlightSegment(highlight, name) {
-    setSpinValues(prevSpinValues => {
-      return prevSpinValues.map(sv => {
-        return sv.name === name ? {...sv, isFocus: highlight ? true : false} : {...sv, isFocus: false}
-      })
-    })
-  }
-
-  function addMoreOdds() {
-    setSpinValues(prev => {
-      const newValue = prev.length + 1
-      const name = `sv-${newValue}`
-      const value = 100 / newValue
-      const withNewOdd = [
-        ...prev,
-        {
-          name,
-          text: `Choice ${newValue}`,
-          color: colors[prev.length % colors.length],
-          isFocus: false,
-        }
-      ]
-      const adjustValues = withNewOdd.map(s => {
-        const sumValues = withNewOdd.reduce((acc, curr) => curr.name !== name ? acc + curr.value : acc, 0)
-        return s.name === name ? {...s, value} : {...s, value: (s.value*(100-value))/sumValues}
-      })
-      return adjustValues
-    })
-  }
-
-  function removeOdd(name) {
-    setSpinValues(prev => {
-      const filtered = prev.filter(s => s.name !== name)
-      const sumValues = filtered.reduce((acc, curr) => curr.name !== name ? acc + curr.value : acc, 0)
-      const adjustValues = filtered.map(s => {
-        return {...s, value: (s.value*100)/sumValues}
-      })
-      return adjustValues
-    })
-  }
-  
   function handleInputClick(e, name) {
     const {type} = e
     if (type.includes('down') & focusedInput !== name) {
@@ -135,14 +101,102 @@ export default function Odds(props) {
     if (!clickedInput && !focusedInput) setIsDown(down)
   }
 
-  function changeActualSpin(arr, name) {
-    const newSpin = arr.find(w => w.name === name)
-    setSpinValues(newSpin.segments)
+  function highlightSegment(highlight, name) {
+    setSpinValues(prevSpinValues => {
+      return prevSpinValues.map(sv => {
+        return sv.name === name ? {...sv, isFocus: highlight ? true : false} : {...sv, isFocus: false}
+      })
+    })
   }
 
-  function removeWheel(name) {
+  // Odds
+
+  function addMoreOdds() {
+    setSpinValues(prev => {
+      const newValue = prev.length + 1
+      const name = `sv-${newValue}`
+      const value = 100 / newValue
+      const withNewOdd = [
+        ...prev,
+        {
+          name,
+          text: nextValue(newValue),
+          color: colors[prev.length % colors.length],
+          isFocus: false,
+        }
+      ]
+      const adjustValues = withNewOdd.map(s => {
+        const sumValues = withNewOdd.reduce((acc, curr) => curr.name !== name ? acc + curr.value : acc, 0)
+        return s.name === name ? {...s, value} : {...s, value: (s.value*(100-value))/sumValues}
+      })
+      return adjustValues
+    })
+  }
+
+  function removeOdd(name) {
+    setSpinValues(prev => {
+      const filtered = prev.filter(s => s.name !== name)
+      const sumValues = filtered.reduce((acc, curr) => curr.name !== name ? acc + curr.value : acc, 0)
+      const adjustValues = filtered.map(s => {
+        return {...s, value: (s.value*100)/sumValues}
+      })
+      return adjustValues
+    })
+  }
+  
+  function changeActualSpin(arr, name) {
+    const newSpin = arr.find(w => w.name === name)
+
+    if (newSpin.colors) {
+      setColors(newSpin.colors)
+    }
+
+    if (newSpin.nextValue) {
+      setNextValue(() => newSpin.nextValue)
+    }
+
+    setSpinValues(newSpin.segments)
+    setActualWheel(name)
+  }
+
+  function removeWheel(e, name) {
+    e.stopPropagation()
     setWheels(prev =>  prev.filter(w => w.name !== name))
   }
+
+  // History
+
+  function clearHistory() {
+    setHistory([])
+  }
+
+  // Save
+
+  function saveWheel() {
+    const thereIs = wheels.find(w => w.name === actualWheel)
+    if (thereIs)  {
+      setWheels(prev => {
+        return prev.map(w => {
+          return w.name === actualWheel ? (
+            {
+              ...w,
+              segments: [
+                ...spinValues
+              ]
+            }
+          ) : w
+        })
+      })
+    } else {
+      setIsSaveOpen(true)
+    }
+  }
+
+  function newWheel() {
+    setIsSaveOpen(true)
+  }
+
+  // Elements
 
   const oddsElements = spinValues.map((s, i) => {
     return (
@@ -196,7 +250,7 @@ export default function Odds(props) {
         </span>
         {/* {s.name !== 'sv-1' && s.name !== 'sv-2' && */}
           <Close 
-            className='icon-small icon-click'
+            className='icon-small icon-click odds-close'
             onClick={() => spinValues.length > 2 ? removeOdd(s.name) : null}
           />
         {/* } */}
@@ -207,24 +261,27 @@ export default function Odds(props) {
   const historyElements = history.length > 0 ? history.map((h, i) => {
     return (
       <>
-        <li>{i+1}º - {h.text}</li>
+        <li className='history-item'>
+          <span>{i+1}º</span>
+          <span className='history-text'>{h.text}</span>
+        </li>
       </>
     )
   }) : <span>No history yet :(</span>
 
   const wheelsElements = wheels.length > 0 ? wheels.map((w, i) => {
     return (
-      <>
+      <div className='save-wrapper'>
         <li className='save-item' onClick={() => changeActualSpin(wheels, w.name)}>
-          <span>{w.name}</span>
-          <Close 
-            className='icon-small icon-click'
-            onClick={() => removeWheel(w.name)}
-          />
+          <span className='save-text'>{w.name}</span>
         </li>
-      </>
+          <Close 
+            className='icon-small icon-click save-close'
+            onClick={(e) => removeWheel(e, w.name)}
+          />
+      </div>
     )
-  }) : <span>No save yet :(</span>
+  }) : <span>No saves yet :(</span>
 
   const preSaveWheelsElements = preSaveWheels.map((w, i) => {
     return (
@@ -252,7 +309,7 @@ export default function Odds(props) {
       <div 
         className='odds-container' 
         style={{
-          // transform: isDown ? `translateX(calc(100% - 42px - ${arrowSize}))` : 'translateX(0)'
+          transform: isDown ? `translateX(calc(100% - 42px - ${arrowSize}))` : 'translateX(0)'
         }}
         onMouseOver={() => handleMouseContainer(false)}
         onMouseLeave={() => handleMouseContainer(true)}
@@ -260,7 +317,7 @@ export default function Odds(props) {
         <div 
           className="arrow-wrapper" 
           style={{
-            opacity: isDown ? '0' : '0',
+            opacity: isDown ? '1' : '0',
             pointerEvents: isDown ? 'all' : 'none',
           }}
         >
@@ -269,7 +326,7 @@ export default function Odds(props) {
         <div 
           className="odds-content" 
           style={{
-            // opacity: isDown ? '0' : '1',
+            opacity: isDown ? '0' : '1',
             pointerEvents: isDown ? 'none' : 'all',
           }}
         >
@@ -294,11 +351,11 @@ export default function Odds(props) {
           {oddChoose === 'history' && (
             <>
               <div className='history-elements'>
-                <ul>{historyElements}</ul>
+                <ul className='history-list'>{historyElements}</ul>
               </div>
               <button
                 className='bttn dark anim'
-                onClick={addMoreOdds}
+                onClick={clearHistory}
               >
                 Clear
               </button>
@@ -315,13 +372,13 @@ export default function Odds(props) {
               <div className='bttns-wrapper'>
                 <button
                   className='bttn dark anim save-bttn'
-                  onClick={() => setIsSaveOpen(true)}
+                  onClick={saveWheel}
                 >
                   Save
                 </button>
                 <button
                   className='bttn dark anim save-bttn'
-                  onClick={addMoreOdds}
+                  onClick={newWheel}
                 >
                   New
                 </button>

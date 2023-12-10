@@ -5,40 +5,23 @@ import Modal from './Modal'
 import Winner from './Winner'
 import Save from './Save'
 
+import { preSaveWheels } from './wheelsData'
+
 import Github from './svg/Github'
 
 export default function SpinWheel() {
+  const defaultWheel = preSaveWheels.find(w => w.name === 'Default')
   
-  const colors = ['#006d77', '#83c5be', '#ffddd2', '#e29578']
+  const [colors, setColors] = useState(['#006d77', '#83c5be', '#ffddd2', '#e29578'])
   const ballsCount = 10
 
   const [angle, setAngle] = useState(0)
   const [isSpinning, setIsSpinning] = useState(false)
-  const [history, setHistory] = useState([])
+  const [history, setHistory] = useState(JSON.parse(localStorage.getItem('history') || []))
   const [wheels, setWheels] = useState(JSON.parse(localStorage.getItem('wheels') || []))
-  const [spinValues, setSpinValues] = useState([
-    {
-      name: 'sv-1',
-      text: 'Choice 1',
-      value: 33.3333,
-      color: colors[0],
-      isFocus: false,
-    },
-    {
-      name: 'sv-2',
-      text: 'Choice 2',
-      value: 33.3333,
-      color: colors[1],
-      isFocus: false,
-    },
-    {
-      name: 'sv-3',
-      text: 'Choice 3',
-      value: 33.3333,
-      color: colors[2],
-      isFocus: false,
-    },
-  ])
+  const [actualWheel, setActualWheel] = useState('')
+  const [nextValue, setNextValue] = useState(() => defaultWheel.nextValue)
+  const [spinValues, setSpinValues] = useState(defaultWheel.segments)
   
   const [isWinnerOpen, setIsWinnerOpen] = useState(false)
   const [isSaveOpen, setIsSaveOpen] = useState(false)
@@ -67,6 +50,20 @@ export default function SpinWheel() {
     setIsWinnerOpen(true)
   }
 
+
+  console.log(nextValue)
+
+  // Modal
+
+  function closeModal(e, callback) {
+    if (!e.target.className.includes('modal')) return
+  
+    callback()
+
+  }
+
+  // Elements
+
   const aroundBallsElements = Array(ballsCount).fill().map((_, i) => {
     return (
       <div className='spin-balls-container' style={{
@@ -84,8 +81,6 @@ export default function SpinWheel() {
     const higherText = spinValues.reduce((prev, curr) => prev.text.length > curr.text.length ? prev : curr).text.length
     // const fontSize = -(higherText/4) + 3.25
     const fontSize = (100/120)**(higherText-7)+0.5
-    // const fontSize = 1/higherText + .5
-    console.log(fontSize)
     return (
       <>
         <div 
@@ -116,11 +111,16 @@ export default function SpinWheel() {
     localStorage.setItem('wheels', stringify)
   }, [wheels])
 
+  useEffect(() => {
+    const stringify = JSON.stringify(history)
+    localStorage.setItem('history', stringify)
+  }, [history])
+
   return (
     <>
       <Modal
         isOpen={isWinnerOpen}
-        onClick={() => setIsWinnerOpen(false)}
+        onClick={(e) => closeModal(e, () => setIsWinnerOpen(false))}
       >
         <Winner 
           winner={history[history.length-1]?.text}
@@ -128,13 +128,14 @@ export default function SpinWheel() {
       </Modal>
       <Modal
         isOpen={isSaveOpen}
-        onClick={() => null}
+        onClick={(e) => closeModal(e, () => setIsSaveOpen(false))}
       >
         <Save
-          wheels={wheels}
           setWheels={setWheels}
           spinValues={spinValues}
           closeSave={() => setIsSaveOpen(false)}
+          setActualWheel={setActualWheel}
+          isOpen={isSaveOpen}
         />
       </Modal>
       <header className='main-header'>
@@ -180,6 +181,11 @@ export default function SpinWheel() {
           wheels={wheels}
           setWheels={setWheels}
           setIsSaveOpen={setIsSaveOpen}
+          actualWheel={actualWheel}
+          setActualWheel={setActualWheel}
+          setColors={setColors}
+          setNextValue={setNextValue}
+          nextValue={nextValue}
         />
       </main>
     </>

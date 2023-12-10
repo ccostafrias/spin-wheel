@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/spin-wheel/static/css/main.64be8d10.css",
-    "main.js": "/spin-wheel/static/js/main.55158927.js",
+    "main.js": "/spin-wheel/static/js/main.ec456fbc.js",
     "index.html": "/spin-wheel/index.html",
     "main.64be8d10.css.map": "/spin-wheel/static/css/main.64be8d10.css.map",
-    "main.55158927.js.map": "/spin-wheel/static/js/main.55158927.js.map"
+    "main.ec456fbc.js.map": "/spin-wheel/static/js/main.ec456fbc.js.map"
   },
   "entrypoints": [
     "static/css/main.64be8d10.css",
-    "static/js/main.55158927.js"
+    "static/js/main.ec456fbc.js"
   ]
 }

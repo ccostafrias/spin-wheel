@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react'
 
-import ArrowLeft from "./svg/ArrowLeft"
-import Close from "./svg/Close"
+import ArrowLeft from "../assets/svg/ArrowLeft"
+import Close from "../assets/svg/Close"
 
-import { preSaveWheels } from './wheelsData'
+import { preSaveWheels } from '../data/wheelsData'
 
 export default function Odds(props) {
 

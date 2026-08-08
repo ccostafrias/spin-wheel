@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react'
 
-import Odds from "./Odds"
-import Modal from './Modal'
-import Winner from './Winner'
-import Save from './Save'
+import Odds from "../components/Odds"
+import Modal from '../components/Modal'
+import Winner from '../components/Winner'
+import Save from '../components/Save'
 
-import { preSaveWheels } from './wheelsData'
+import { preSaveWheels } from '../data/wheelsData'
 
-import Github from './svg/Github'
+import Github from '../assets/svg/Github'
 
 export default function SpinWheel() {
   const defaultWheel = preSaveWheels.find(w => w.name === 'Default')
@@ -49,9 +49,6 @@ export default function SpinWheel() {
     setHistory(prev => [...prev, segmentWinner])
     setIsWinnerOpen(true)
   }
-
-
-  console.log(nextValue)
 
   // Modal
 

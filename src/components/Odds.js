@@ -30,9 +30,6 @@ export default function Odds(props) {
   const [oddChoose, setOddChoose] = useState('odds')
   const isDownRef = useRef(true)
 
-  const arrowSize = getComputedStyle(document.documentElement)
-    .getPropertyValue('--arrow-size')
-
   // Input
   
   function handleChange(event) {
@@ -307,10 +304,7 @@ export default function Odds(props) {
   return (
     <>
       <div 
-        className='odds-container' 
-        style={{
-          transform: isDown ? `translateX(calc(100% - 42px - ${arrowSize}))` : 'translateX(0)'
-        }}
+        className={`odds-container ${isDown ? 'is-down' : ''}`} 
         onMouseOver={() => handleMouseContainer(false)}
         onMouseLeave={() => handleMouseContainer(true)}
       >

@@ -52,7 +52,7 @@ export default function Winner(props) {
     if (isOpen) {
       inputRef.current.focus()
     }
-  }, isOpen)
+  }, [isOpen])
 
   return (
       <div className='save-container'>

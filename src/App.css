@@ -121,6 +121,7 @@ body, #root {
 
 .main-header > h2 {
   margin-right: auto;
+  user-select: none;
 }
 
 .main-header {
@@ -147,7 +148,8 @@ h2 {
 }
 
 .bttns-wrapper {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
   gap: .25rem;
 }
 

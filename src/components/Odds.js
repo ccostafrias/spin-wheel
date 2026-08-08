@@ -4,6 +4,7 @@ import ArrowLeft from "../assets/svg/ArrowLeft"
 import Close from "../assets/svg/Close"
 
 import { preSaveWheels } from '../data/wheelsData'
+import { toast } from 'react-toastify'
 
 export default function Odds(props) {
 
@@ -165,6 +166,7 @@ export default function Odds(props) {
 
   function clearHistory() {
     setHistory([])
+    toast.success('History cleared!')
   }
 
   // Save
@@ -184,6 +186,7 @@ export default function Odds(props) {
           ) : w
         })
       })
+      toast.success('Wheel updated!')
     } else {
       setIsSaveOpen(true)
     }
@@ -191,6 +194,36 @@ export default function Odds(props) {
 
   function newWheel() {
     setIsSaveOpen(true)
+  }
+
+  async function exportWheel() {
+    const wheelToExport = wheels.find(w => w.name === actualWheel)
+    if (!wheelToExport) {
+      toast.error('You need to save the wheel first!')
+      return
+    }
+
+    const data = encodeURIComponent(JSON.stringify(wheelToExport))
+    await navigator.clipboard.writeText(data)
+    toast.success('Wheel copied to clipboard!')
+  }
+
+  async function importWheel() {
+    await navigator.clipboard.readText()
+      .then(text => {
+        const wheelImported = JSON.parse(decodeURIComponent(text))
+        const thereIs = wheels.find(w => w.name === wheelImported.name)
+        if (thereIs) {
+          toast.error('There is already a wheel with this name!')
+          return
+        }
+        setWheels(prev => [...prev, wheelImported])
+        setActualWheel(wheelImported.name)
+        toast.success('Wheel imported!')
+      })
+      .catch(err => {
+        toast.error('Error importing wheel!')
+      })
   }
 
   // Elements
@@ -364,6 +397,18 @@ export default function Odds(props) {
                 <ul className='save-list'>{wheelsElements}</ul>
               </div>
               <div className='bttns-wrapper'>
+                <button
+                  className='bttn dark anim save-bttn'
+                  onClick={importWheel}
+                >
+                  Import
+                </button>
+                <button
+                  className='bttn dark anim save-bttn'
+                  onClick={exportWheel}
+                >
+                  Export
+                </button>
                 <button
                   className='bttn dark anim save-bttn'
                   onClick={saveWheel}

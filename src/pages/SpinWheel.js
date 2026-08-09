@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useReward } from 'react-rewards'
 
 import Odds from "../components/Odds"
 import Modal from '../components/Modal'
@@ -8,6 +9,12 @@ import Save from '../components/Save'
 import { preSaveWheels } from '../data/wheelsData'
 
 import Github from '../assets/svg/Github'
+
+import useAudio from '../hooks/useAudio'
+
+import spinningAudio from '../assets/audios/spinning.mp3'
+import winAudio from '../assets/audios/win.mp3'
+import AudioIcon from '../assets/svg/AudioIcon'
 
 export default function SpinWheel() {
   const defaultWheel = preSaveWheels.find(w => w.name === 'Default')
@@ -25,8 +32,15 @@ export default function SpinWheel() {
   
   const [isWinnerOpen, setIsWinnerOpen] = useState(false)
   const [isSaveOpen, setIsSaveOpen] = useState(false)
+  const [isMuted, setIsMuted] = useState(false)
+
+  const { togglePlay: toggleSpin, restartAudio: restartSpin } = useAudio(spinningAudio, isMuted)
+  const { togglePlay: toggleWin } = useAudio(winAudio, isMuted)
+
+  const { reward, isAnimating } = useReward('rewardId', 'confetti');
 
   function spinBall() {
+    restartSpin()
     setIsSpinning(true)
     setAngle(prevAngle => {
       const [_, yes] = spinValues
@@ -56,7 +70,16 @@ export default function SpinWheel() {
     if (!e.target.className.includes('modal')) return
   
     callback()
+  }
 
+  // Handlers
+
+  function handleTransitionEnd(e) {
+    if (e.propertyName !== 'transform') return
+    setIsSpinning(false)
+    reward()
+    toggleWin()
+    addHistory()
   }
 
   // Elements
@@ -103,6 +126,8 @@ export default function SpinWheel() {
     )
   })
 
+  // Effects
+
   useEffect(() => {
     const stringify = JSON.stringify(wheels)
     localStorage.setItem('wheels', stringify)
@@ -137,6 +162,12 @@ export default function SpinWheel() {
       </Modal>
       <header className='main-header'>
         <h2>SpinWheel</h2>
+        <button onClick={() => setIsMuted(!isMuted)}>
+          <AudioIcon
+            isMuted={isMuted}
+            className='icon-medium'
+          />
+        </button>
         <a href="https://github.com/ccostafrias" target='_blank'>
           <Github
             className='icon-medium'
@@ -148,17 +179,16 @@ export default function SpinWheel() {
           <div className="spin-pointer-wrapper">
             <div className="spin-pointer"></div>
           </div>
-          <button type='button' className="spin-ball" onClick={spinBall}>SPIN</button>
+          <button type='button' className="spin-ball" onClick={spinBall}>
+            <span id="rewardId" />
+            SPIN
+          </button>
           <div 
             className="spin-segments-wrapper" 
             style={{
               transform: `rotate(${angle}deg)`
             }}
-            onTransitionEnd={(e) => {
-              if (e.propertyName !== 'transform') return
-              setIsSpinning(false)
-              addHistory()
-            }}
+            onTransitionEnd={handleTransitionEnd}
           >
             <div className='spin-balls-wrapper' style={{
               transform: `translate(-50%, -50%) rotate(${360/(ballsCount*2)}deg)`

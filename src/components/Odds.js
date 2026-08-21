@@ -112,7 +112,7 @@ export default function Odds(props) {
   function addMoreOdds() {
     setSpinValues(prev => {
       const newValue = prev.length + 1
-      const name = `sv-${newValue}`
+      const name = crypto.randomUUID()
       const value = 100 / newValue
       const withNewOdd = [
         ...prev,
@@ -217,8 +217,9 @@ export default function Odds(props) {
           toast.error('There is already a wheel with this name!')
           return
         }
-        setWheels(prev => [...prev, wheelImported])
-        setActualWheel(wheelImported.name)
+        const newWheels = [...wheels, wheelImported]
+        setWheels(newWheels)
+        changeActualSpin(newWheels, wheelImported.name)
         toast.success('Wheel imported!')
       })
       .catch(err => {
@@ -278,12 +279,10 @@ export default function Odds(props) {
           />
           <span>%</span>
         </span>
-        {/* {s.name !== 'sv-1' && s.name !== 'sv-2' && */}
-          <Close 
-            className='icon-small icon-click odds-close'
-            onClick={() => spinValues.length > 2 ? removeOdd(s.name) : null}
-          />
-        {/* } */}
+        <Close 
+          className='icon-small icon-click odds-close'
+          onClick={() => spinValues.length > 2 ? removeOdd(s.name) : null}
+        />
       </div>
     )
   })
